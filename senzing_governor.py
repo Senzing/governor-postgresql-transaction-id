@@ -168,11 +168,11 @@ class Governor:
         self.low_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", max(self.high_watermark - 100000000, 0)))
         self.sql_stmt = "SELECT age(datfrozenxid) FROM pg_database WHERE datname = (%s);"
         self.wait_time = int(os.getenv("SENZING_GOVERNOR_WAIT", 15))
-        sql_connections = os.getenv("SENZING_GOVERNOR_SQL_CONNECTIONS", "")
+        database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", "")
 
         # Make database connections.
 
-        sql_connection_strings = sql_connections.split(list_separator)
+        sql_connection_strings = database_urls.split(list_separator)
         self.database_connections = {}
         for database_connection_string in sql_connection_strings:
 
