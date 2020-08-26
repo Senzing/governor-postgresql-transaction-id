@@ -97,21 +97,21 @@ These are "one-time tasks" which may already have been completed.
 ### Download
 
 1. Get a local copy of
-   [senzing_governor.py](senzing_governor.py).
-   Example:
+   [senzing_governor.py](senzing_governor.py)
+   and programs that test the governor.
 
-    1. :pencil2: Specify where to download files.
+    1. :pencil2: Specify a director of where to download files.
        Example:
 
         ```console
-        export SENZING_PROJECT_DIR=~/test-governor
+        export SENZING_GOVERNOR_PROJECT_DIR=~/test-governor
         ```
 
     1. Make project directory.
        Example:
 
         ```console
-        mkdir -p ${SENZING_PROJECT_DIR}
+        mkdir -p ${SENZING_GOVERNOR_PROJECT_DIR}
         ```
 
     1. Download files.
@@ -119,16 +119,20 @@ These are "one-time tasks" which may already have been completed.
 
         ```console
         curl -X GET \
-          --output ${SENZING_PROJECT_DIR}/senzing_governor.py \
+          --output ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor.py \
           https://raw.githubusercontent.com/Senzing/governor-postgresql-transaction-id/master/senzing_governor.py
 
         curl -X GET \
-          --output ${SENZING_PROJECT_DIR}/senzing_governor_tester.py \
+          --output ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester.py \
           https://raw.githubusercontent.com/Senzing/governor-postgresql-transaction-id/master/senzing_governor_tester.py
 
+        chmod +x ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester.py
+
         curl -X GET \
-          --output ${SENZING_PROJECT_DIR}/senzing_governor_tester_context_manager.py \
+          --output ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester_context_manager.py \
           https://raw.githubusercontent.com/Senzing/governor-postgresql-transaction-id/master/senzing_governor_tester_context_manager.py
+
+        chmod +x ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester_context_manager.py
         ```
 
 1. :thinking: **Alternative:** The entire git repository can be downloaded by following instructions at
@@ -140,15 +144,32 @@ These are "one-time tasks" which may already have been completed.
    Example:
 
     ```console
-    export PYTHONPATH=${PYTHONPATH}:${SENZING_PROJECT_DIR}
+    export PYTHONPATH=${PYTHONPATH}:${SENZING_GOVERNOR_PROJECT_DIR}
     ```
 
-1. Identify PostgreSQL database.
+1. :pencil2: Identify PostgreSQL database.
+   The format of the URL can be seen at
+   [SENZING_DATABASE_URL](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_database_url)
    Example:
 
     ```console
-    export SENZING_GOVERNOR_SQL_CONNECTIONS=postgresql://postgres:postgres@localhost:5432/G2
+    export SENZING_GOVERNOR_DATABASE_URLS=postgresql://postgres:postgres@localhost:5432/G2
     ```
+
+    1. :pencil2: Multiple databases can be specified in a list.
+       Example:
+
+        ```console
+        export SENZING_GOVERNOR_DATABASE_URLS=postgresql://postgres:postgres@localhost:5432/G2,postgresql://postgres:postgres@localhost:5432/G2-RES
+        ```
+
+    1. The comma is used as a list item separator.  If a different separator is needed it can be specified.
+       Example:
+
+        ```console
+        export SENZING_GOVERNOR_LIST_SEPARATOR="+"
+        export SENZING_GOVERNOR_DATABASE_URLS="postgresql://postgres:postgres@localhost:5432/G2+postgresql://postgres:postgres@localhost:5432/G2-RES"
+        ```
 
 ### Run command
 
@@ -156,7 +177,7 @@ These are "one-time tasks" which may already have been completed.
    Example:
 
    ```console
-   ${SENZING_PROJECT_DIR}/senzing_governor_tester.py
+   ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester.py
    ```
 
 1. For more examples of use, see [Examples of CLI](#examples-of-cli).
@@ -200,7 +221,7 @@ The following examples require initialization described in
    Example:
 
    ```console
-   ${SENZING_PROJECT_DIR}/senzing_governor_tester_context_manager.py
+   ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester_context_manager.py
    ```
 
 ## Advanced
@@ -209,10 +230,11 @@ The following examples require initialization described in
 
 Configuration values specified by environment variable or command line parameter.
 
+- **[SENZING_GOVERNOR_DATABASE_URLS](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_database_urls)**
+- **[SENZING_GOVERNOR_LIST_SEPARATOR](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_list_separator)**
 - **[SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_high_watermark)**
 - **[SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_low_watermark)**
-- **[SENZING_GOVERNOR_SQL_CONNECTIONS](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_sql_connections)**
-- **[SENZING_PROJECT_DIR](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_project_dir)**
+- **[SENZING_GOVERNOR_PROJECT_DIR](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_project_dir)**
 
 ## Errors
 
