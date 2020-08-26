@@ -2,7 +2,26 @@
 
 # -----------------------------------------------------------------------------
 # governor.py
-# -----------------------------------------------------------------------------
+#
+# Class: Governor
+#
+# An example Senzing Governor plugin that detects transaction ID age (XID) in a
+# Postgres database.  If the age is above a "high watermark",
+# SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK, then the threads are paused
+# until the age is less than a "low watermark",
+# SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK.
+# Once the XID age is below the "low watermark", the threads resume processing.
+#
+# XID age is reduced with the Postgres vacuum command. This example doesn't
+# attempt to issue the vacuum command.  The user running the Governor may not
+# have the privileges to do so. When the age threshold is detected, a manual step
+# of issuing the postgres vacuum command is required.
+# Reference: https://www.postgresql.org/docs/current/sql-vacuum.html
+#
+# This example uses the native Python Postgres driver psycopg2.
+# Full details on installation: https://www.psycopg.org/docs/install.html
+# Basic installation: pip3 install psycopg2 --user
+# --------------------------------------------------------------------------------------------------------------
 
 import logging
 import os
@@ -30,7 +49,7 @@ reserved_character_list = [';', ',', '/', '?', ':', '@', '=', '&']
 class Governor:
 
     # -------------------------------------------------------------------------
-    # Interior methods for database URL parsing
+    # Internal methods for database URL parsing.
     # -------------------------------------------------------------------------
 
     def translate(self, map, astring):
@@ -108,11 +127,21 @@ class Governor:
     # Internal methods.
     # -------------------------------------------------------------------------
 
-    def get_current_watermark(self, connection, database_name):
+    def get_current_watermark(self, cursor, database_name):
 
-        connection.execute(self.sql_stmt, [database_name])
-        result = connection.fetchone()[0]
+        cursor.execute(self.sql_stmt, [database_name])
+        result = cursor.fetchone()[0]
         return result
+
+    # -------------------------------------------------------------------------
+    # Support for Python Context Manager.
+    # -------------------------------------------------------------------------
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
 
     # -------------------------------------------------------------------------
     # Public API methods.
@@ -122,37 +151,30 @@ class Governor:
 
     def __init__(self, g2_engine=None, hint=None, *args, **kwargs):
 
+        logging.info("Using governor-postgresql-transaction-id Governor. Version: {0} Updated: {1}".format(__version__, __updated__))
+
         # Store parameters in instance variables.
 
         self.g2_engine = g2_engine
         self.hint = hint
 
-        # Configure logging.
-
-        log_format = '%(asctime)s %(message)s'
-        logging.basicConfig(format=log_format, level=logging.INFO)
-        logging.info("Using governor-postgresql-transaction-id Governor. Version: {0} Updated: {1}".format(__version__, __updated__))
-
         # Instance variables.
 
-        list_seperator = os.getenv("SENZING_GOVERNOR_LIST_SEPARATOR", ',')
+        list_separator = os.getenv("SENZING_GOVERNOR_LIST_SEPARATOR", ',')
         self.counter = 0
         self.counter_lock = threading.Lock()
         self.high_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK", 1000000000))
+        self.interval = int(os.getenv("SENZING_GOVERNOR_INTERVAL", 500))
         self.low_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", max(self.high_watermark - 100000000, 0)))
-        self.sleep_time = int(os.getenv("SENZING_GOVERNOR_SLEEP", 15))
         self.sql_stmt = "SELECT age(datfrozenxid) FROM pg_database WHERE datname = (%s);"
-        self.stride = int(os.getenv("SENZING_GOVERNOR_STRIDE", 500))
-
-        # Make a list of database SQL connection string
-
+        self.wait_time = int(os.getenv("SENZING_GOVERNOR_WAIT", 15))
         sql_connections = os.getenv("SENZING_GOVERNOR_SQL_CONNECTIONS", "")
-        self.sql_connection_strings = sql_connections.split(list_seperator)
 
         # Make database connections.
 
+        sql_connection_strings = sql_connections.split(list_separator)
         self.database_connections = {}
-        for database_connection_string in self.sql_connection_strings:
+        for database_connection_string in sql_connection_strings:
 
             parsed_database_url = self.parse_database_url(database_connection_string)
             connection = psycopg2.connect(**parsed_database_url)
@@ -172,40 +194,38 @@ class Governor:
         The caller of govern() waits synchronously.
         """
 
-        # counter_lock serialized threads.
+        # counter_lock serializes threads.
 
         with self.counter_lock:
             self.counter += 1
 
-            # Only make expensive check after N (stride) records have been read.
+            # Only make expensive checks after "interval" records have been read.
 
-            if self.counter % self.stride == 0:
-                logging.info("senzing-{0}0000I Governor is checking PostgreSQL Transaction IDs after {1} inserts.".format(SENZING_PRODUCT_ID, self.counter))
+            if self.counter % self.interval == 0:
 
                 # Go through each database connection to determine if watermark is above high_watermark.
 
                 for database_connection in self.database_connections.values():
-
-                    print(database_connection)
-
-                    connection = database_connection.get("cursor")
+                    cursor = database_connection.get("cursor")
                     database_name = database_connection.get("parsed_database_url", {}).get("dbname")
-                    watermark = self.get_current_watermark(connection, database_name)
+                    watermark = self.get_current_watermark(cursor, database_name)
+                    logging.info("senzing-{0}0001I Governor is checking PostgreSQL Transaction IDs. Database: {1}; Current XID: {2}; Max XID: {3}".format(SENZING_PRODUCT_ID, database_name, watermark, self.high_watermark))
                     if watermark > self.high_watermark:
 
-                        # Wait until watermark is below low_watermark.
+                        # If above high watermark, wait until watermark is below low_watermark.
 
                         while watermark > self.low_watermark:
-                            logging.info("senzing-{0}0000I Governor waiting for watermark to go from {1} to {2}.".format(SENZING_PRODUCT_ID, watermark, self.low_watermark))
-                            time.sleep(self.sleep_time)
-                            watermark = self.get_current_watermark(connection, database_name)
+                            logging.info("senzing-{0}0002I Governor waiting {1} seconds for {2} watermark to go from {3} to {4}.".format(SENZING_PRODUCT_ID, self.wait_time, database_name, watermark, self.low_watermark))
+                            time.sleep(self.wait_time)
+                            watermark = self.get_current_watermark(cursor, database_name)
 
-    def cleanup(self, *args, **kwargs):
+    def close(self, *args, **kwargs):
         '''  Tasks to perform when shutting down, e.g., close DB connections '''
 
-        for database_connection in self.database_connections:
+        for database_connection in self.database_connections.values():
             database_connection.get('cursor').close()
             database_connection.get('connection').close()
+        logging.info("senzing-{0}0003I Governor closed.".format(SENZING_PRODUCT_ID))
         return
 
 
