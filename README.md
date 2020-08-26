@@ -24,7 +24,7 @@ SELECT age(datfrozenxid) FROM pg_database WHERE datname = (%s);
 If the age is greater than a high-watermark,
 [SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_postgresql_high_watermark),
 then the Governor waits until the watermark recedes to a low-watermark,
-[SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_postgresql_low_watermark),
+[SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_postgresql_low_watermark).
 
 The lowering of the watermark must be done manually by using PostgreSQL
 [VACUUM](https://www.postgresql.org/docs/current/sql-vacuum.html).
@@ -209,6 +209,8 @@ The following examples require initialization described in
 
 Configuration values specified by environment variable or command line parameter.
 
+- **[SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_high_watermark)**
+- **[SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_low_watermark)**
 - **[SENZING_GOVERNOR_SQL_CONNECTIONS](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_sql_connections)**
 - **[SENZING_PROJECT_DIR](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_project_dir)**
 
