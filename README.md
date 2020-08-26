@@ -156,14 +156,14 @@ These are "one-time tasks" which may already have been completed.
     export SENZING_GOVERNOR_DATABASE_URLS=postgresql://postgres:postgres@localhost:5432/G2
     ```
 
-    1. :pencil2: Multiple databases can be specified in a list.
+    1. :thinking: **Optional:** Multiple databases can be specified in a list.
        Example:
 
         ```console
         export SENZING_GOVERNOR_DATABASE_URLS=postgresql://postgres:postgres@localhost:5432/G2,postgresql://postgres:postgres@localhost:5432/G2-RES
         ```
 
-    1. The comma is used as a list item separator.  If a different separator is needed it can be specified.
+    1. :thinking: **Optional:** The comma is used as a list item separator.  If a different separator is needed it can be specified.
        Example:
 
         ```console
@@ -231,10 +231,12 @@ The following examples require initialization described in
 Configuration values specified by environment variable or command line parameter.
 
 - **[SENZING_GOVERNOR_DATABASE_URLS](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_database_urls)**
+- **[SENZING_GOVERNOR_INTERVAL](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_interval)**
 - **[SENZING_GOVERNOR_LIST_SEPARATOR](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_list_separator)**
 - **[SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_high_watermark)**
 - **[SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_low_watermark)**
 - **[SENZING_GOVERNOR_PROJECT_DIR](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_project_dir)**
+- **[SENZING_GOVERNOR_WAIT](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_governor_wait)**
 
 ## Errors
 
