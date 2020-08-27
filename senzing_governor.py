@@ -151,7 +151,7 @@ class Governor:
 
     def __init__(self, g2_engine=None, hint=None, *args, **kwargs):
 
-        logging.info("Using governor-postgresql-transaction-id Governor. Version: {0} Updated: {1}".format(__version__, __updated__))
+        logging.info("senzing-{0}0001I Using governor-postgresql-transaction-id Governor. Version: {1} Updated: {2}".format(SENZING_PRODUCT_ID, __version__, __updated__))
 
         # Store parameters in instance variables.
 
@@ -209,13 +209,13 @@ class Governor:
                     cursor = database_connection.get("cursor")
                     database_name = database_connection.get("parsed_database_url", {}).get("dbname")
                     watermark = self.get_current_watermark(cursor, database_name)
-                    logging.info("senzing-{0}0001I Governor is checking PostgreSQL Transaction IDs. Database: {1}; Current XID: {2}; High watermark XID: {3}".format(SENZING_PRODUCT_ID, database_name, watermark, self.high_watermark))
+                    logging.info("senzing-{0}0002I Governor is checking PostgreSQL Transaction IDs. Database: {1}; Current XID: {2}; High watermark XID: {3}".format(SENZING_PRODUCT_ID, database_name, watermark, self.high_watermark))
                     if watermark > self.high_watermark:
 
                         # If above high watermark, wait until watermark is below low_watermark.
 
                         while watermark > self.low_watermark:
-                            logging.info("senzing-{0}0002I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} to low watermark of {4}.".format(SENZING_PRODUCT_ID, self.wait_time, database_name, watermark, self.low_watermark))
+                            logging.info("senzing-{0}0003I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} to low watermark of {4}.".format(SENZING_PRODUCT_ID, self.wait_time, database_name, watermark, self.low_watermark))
                             time.sleep(self.wait_time)
                             watermark = self.get_current_watermark(cursor, database_name)
 
@@ -225,7 +225,7 @@ class Governor:
         for database_connection in self.database_connections.values():
             database_connection.get('cursor').close()
             database_connection.get('connection').close()
-        logging.info("senzing-{0}0003I Governor closed.".format(SENZING_PRODUCT_ID))
+        logging.info("senzing-{0}0004I Governor closed.".format(SENZING_PRODUCT_ID))
         return
 
 
