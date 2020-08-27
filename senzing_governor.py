@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2020-08-26'
+__updated__ = '2020-08-27'
 
 SENZING_PRODUCT_ID = "5017"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -165,7 +165,7 @@ class Governor:
         self.counter_lock = threading.Lock()
         self.high_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK", 1000000000))
         self.interval = int(os.getenv("SENZING_GOVERNOR_INTERVAL", 500))
-        self.low_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", max(self.high_watermark - 100000000, 0)))
+        self.low_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", 90000000))
         self.sql_stmt = "SELECT age(datfrozenxid) FROM pg_database WHERE datname = (%s);"
         self.wait_time = int(os.getenv("SENZING_GOVERNOR_WAIT", 15))
         database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", "")
