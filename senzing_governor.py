@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # -----------------------------------------------------------------------------
-# governor.py
+# senzing_governor.py
 #
 # Class: Governor
 #
@@ -20,7 +20,6 @@
 #
 # This example uses the native Python Postgres driver psycopg2.
 # Full details on installation: https://www.psycopg.org/docs/install.html
-# Basic installation: pip3 install psycopg2 --user
 # --------------------------------------------------------------------------------------------------------------
 
 import logging
@@ -124,7 +123,7 @@ class Governor:
         return result
 
     # -------------------------------------------------------------------------
-    # Internal methods.
+    # Internal methods for accessing database.
     # -------------------------------------------------------------------------
 
     def get_current_watermark(self, cursor, database_name):
@@ -153,10 +152,10 @@ class Governor:
         database_urls=None,
         high_watermark=1000000000,
         hint="",
-        interval=500,
+        interval=100000,
         list_separator=',',
         low_watermark=90000000,
-        wait_time=15,
+        wait_time=60,
         *args,
         **kwargs
     ):
