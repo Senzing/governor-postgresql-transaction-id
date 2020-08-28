@@ -130,8 +130,7 @@ class Governor:
     def get_current_watermark(self, cursor, database_name):
 
         cursor.execute(self.sql_stmt, [database_name])
-        result = cursor.fetchone()[0]
-        return result
+        return cursor.fetchone()[0]
 
     # -------------------------------------------------------------------------
     # Support for Python Context Manager.
@@ -146,7 +145,7 @@ class Governor:
     # -------------------------------------------------------------------------
     # Public API methods.
     #  - govern()
-    #  - cleanup()
+    #  - close()
     # -------------------------------------------------------------------------
 
     def __init__(
@@ -166,13 +165,13 @@ class Governor:
 
         # Instance variables. Precedence: 1) OS Environment variables, 2) parameters
 
-        database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", database_urls)
-        list_separator = os.getenv("SENZING_GOVERNOR_LIST_SEPARATOR", list_separator)
         self.counter = 0
         self.counter_lock = threading.Lock()
+        self.database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", database_urls)
         self.high_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK", high_watermark))
-        self.hint = hint
+        self.hint = os.getenv("SENZING_GOVERNOR_HINT", hint)
         self.interval = int(os.getenv("SENZING_GOVERNOR_INTERVAL", interval))
+        self.list_separator = os.getenv("SENZING_GOVERNOR_LIST_SEPARATOR", list_separator)
         self.low_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", low_watermark))
         self.sql_stmt = "SELECT age(datfrozenxid) FROM pg_database WHERE datname = (%s);"
         self.wait_time = int(os.getenv("SENZING_GOVERNOR_WAIT", wait_time))
@@ -181,8 +180,8 @@ class Governor:
         # Make database connections.
 
         self.database_connections = {}
-        if database_urls:
-            sql_connection_strings = database_urls.split(list_separator)
+        if self.database_urls:
+            sql_connection_strings = self.database_urls.split(self.list_separator)
             for database_connection_string in sql_connection_strings:
 
                 parsed_database_url = self.parse_database_url(database_connection_string)
@@ -191,12 +190,12 @@ class Governor:
 
                 schema = database_connection_string.split(':')[0]
                 if schema != "postgresql":
-                    logging.info("senzing-50170701W SENZING_GOVERNOR_DATABASE_URLS contains a non-postgres URL:  {schema}://{user}:xxxxxxxx@{host}:{port}/{dbname}".format(schema=schema, **parsed_database_url))
+                    logging.info("senzing-{product_id}0701W SENZING_GOVERNOR_DATABASE_URLS contains a non-postgres URL:  {schema}://{user}:xxxxxxxx@{host}:{port}/{dbname}".format(product_id=SENZING_PRODUCT_ID, schema=schema, **parsed_database_url))
                     continue
 
                 # Create connection.
 
-                logging.info("senzing-50170003I Governor monitoring postgresql://{user}:xxxxxxxx@{host}:{port}/{dbname}".format(**parsed_database_url))
+                logging.info("senzing-{product_id}0003I Governor monitoring {schema}://{user}:xxxxxxxx@{host}:{port}/{dbname}".format(product_id=SENZING_PRODUCT_ID, schema=schema, **parsed_database_url))
                 connection = psycopg2.connect(**parsed_database_url)
                 connection.set_session(autocommit=True, isolation_level='READ UNCOMMITTED', readonly=True)
                 cursor = connection.cursor()
@@ -246,7 +245,6 @@ class Governor:
             database_connection.get('cursor').close()
             database_connection.get('connection').close()
         logging.info("senzing-{0}0006I Governor closed.".format(SENZING_PRODUCT_ID))
-        return
 
 
 if __name__ == '__main__':
