@@ -174,7 +174,7 @@ class Governor:
         self.low_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", low_watermark))
         self.sql_stmt = "SELECT age(datfrozenxid) FROM pg_database WHERE datname = (%s);"
         self.wait_time = int(os.getenv("SENZING_GOVERNOR_WAIT", wait_time))
-        logging.info("senzing-{0}0002I SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK: {1}; SENZING_GOVERNOR_INTERVAL: {2}; SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK {3}; SENZING_GOVERNOR_WAIT: {4}; Hint: {5}".format(SENZING_PRODUCT_ID, self.high_watermark, self.interval, self.low_watermark, self.wait_time, self.hint))
+        logging.info("senzing-{0}0002I SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK: {1}; SENZING_GOVERNOR_INTERVAL: {2}; SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK {3}; SENZING_GOVERNOR_WAIT: {4}; SENZING_GOVERNOR_HINT: {5}".format(SENZING_PRODUCT_ID, self.high_watermark, self.interval, self.low_watermark, self.wait_time, self.hint))
 
         # Make database connections.
 
