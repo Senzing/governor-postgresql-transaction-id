@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2020-08-27'
+__updated__ = '2020-08-28'
 
 SENZING_PRODUCT_ID = "5017"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -149,26 +149,33 @@ class Governor:
     #  - cleanup()
     # -------------------------------------------------------------------------
 
-    def __init__(self, g2_engine=None, hint=None, *args, **kwargs):
+    def __init__(
+        self,
+        database_urls=None,
+        high_watermark=1000000000,
+        hint="",
+        interval=500,
+        list_separator=',',
+        low_watermark=90000000,
+        wait_time=15,
+        *args,
+        **kwargs
+    ):
 
         logging.info("senzing-{0}0001I Using governor-postgresql-transaction-id Governor. Version: {1} Updated: {2}".format(SENZING_PRODUCT_ID, __version__, __updated__))
 
-        # Store parameters in instance variables.
+        # Instance variables. Precedence: 1) OS Environment variables, 2) parameters
 
-        self.g2_engine = g2_engine
-        self.hint = hint
-
-        # Instance variables.
-
-        list_separator = os.getenv("SENZING_GOVERNOR_LIST_SEPARATOR", ',')
+        database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", database_urls)
+        list_separator = os.getenv("SENZING_GOVERNOR_LIST_SEPARATOR", list_separator)
         self.counter = 0
         self.counter_lock = threading.Lock()
-        self.high_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK", 1000000000))
-        self.interval = int(os.getenv("SENZING_GOVERNOR_INTERVAL", 500))
-        self.low_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", 90000000))
+        self.high_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK", high_watermark))
+        self.hint = hint
+        self.interval = int(os.getenv("SENZING_GOVERNOR_INTERVAL", interval))
+        self.low_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", low_watermark))
         self.sql_stmt = "SELECT age(datfrozenxid) FROM pg_database WHERE datname = (%s);"
-        self.wait_time = int(os.getenv("SENZING_GOVERNOR_WAIT", 15))
-        database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", None)
+        self.wait_time = int(os.getenv("SENZING_GOVERNOR_WAIT", wait_time))
         logging.info("senzing-{0}0002I SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK: {1}; SENZING_GOVERNOR_INTERVAL: {2}; SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK {3}; SENZING_GOVERNOR_WAIT: {4}; Hint: {5}".format(SENZING_PRODUCT_ID, self.high_watermark, self.interval, self.low_watermark, self.wait_time, self.hint))
 
         # Make database connections.
