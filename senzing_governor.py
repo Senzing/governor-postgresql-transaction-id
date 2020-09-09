@@ -31,9 +31,9 @@ import time
 from urllib.parse import urlparse
 
 __all__ = []
-__version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.1"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2020-08-28'
+__updated__ = '2020-09-09'
 
 SENZING_PRODUCT_ID = "5017"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -155,6 +155,7 @@ class Governor:
         interval=100000,
         list_separator=',',
         low_watermark=90000000,
+        check_time_interval_in_seconds=5,
         wait_time=60,
         *args,
         **kwargs
@@ -173,8 +174,13 @@ class Governor:
         self.list_separator = os.getenv("SENZING_GOVERNOR_LIST_SEPARATOR", list_separator)
         self.low_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", low_watermark))
         self.sql_stmt = "SELECT age(datfrozenxid) FROM pg_database WHERE datname = (%s);"
+        self.check_time_interval_in_seconds = int(os.getenv("SENZING_GOVERNOR_CHECK_TIME_INTERVAL_IN_SECONDS", check_time_interval_in_seconds))
         self.wait_time = int(os.getenv("SENZING_GOVERNOR_WAIT", wait_time))
         logging.info("senzing-{0}0002I SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK: {1}; SENZING_GOVERNOR_INTERVAL: {2}; SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK {3}; SENZING_GOVERNOR_WAIT: {4}; SENZING_GOVERNOR_HINT: {5}".format(SENZING_PRODUCT_ID, self.high_watermark, self.interval, self.low_watermark, self.wait_time, self.hint))
+
+        # Synthesize variables.
+
+        self.next_check_time = time.time() + self.check_time_interval_in_seconds
 
         # Make database connections.
 
@@ -219,7 +225,11 @@ class Governor:
 
             # Only make expensive checks after "interval" records have been read.
 
-            if self.counter % self.interval == 0:
+            if (self.counter % self.interval == 0) or (time.time() > self.next_check_time):
+
+                # Reset timer.
+
+                self.next_check_time = time.time() + self.check_time_interval_in_seconds
 
                 # Go through each database connection to determine if watermark is above high_watermark.
 
