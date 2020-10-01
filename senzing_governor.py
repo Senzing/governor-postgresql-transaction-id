@@ -174,6 +174,7 @@ class Governor:
             self.database_urls = config_dict["SQL"]["CONNECTION"]
         self.database_urls = os.getenv("SENZING_DATABASE_URL", self.database_urls)
         self.database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", self.database_urls)
+        logging.info("!!!!!!!!!!!!! Governor.__init__() self.database_urls is " + self.database_urls)
         self.high_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK", high_watermark))
         self.hint = os.getenv("SENZING_GOVERNOR_HINT", hint)
         self.interval = int(os.getenv("SENZING_GOVERNOR_INTERVAL", interval))
