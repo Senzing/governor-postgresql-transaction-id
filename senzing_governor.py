@@ -28,6 +28,7 @@ import psycopg2
 import string
 import threading
 import time
+import json
 from urllib.parse import urlparse
 
 __all__ = []
@@ -167,7 +168,12 @@ class Governor:
 
         self.counter = 0
         self.counter_lock = threading.Lock()
-        self.database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", database_urls)
+        self.database_urls = database_urls
+        if os.getenv("SENZING_ENGINE_CONFIGURATION_JSON") is not None:
+            config_dict = json.loads(os.getenv("SENZING_ENGINE_CONFIGURATION_JSON"))
+            self.database_urls = config_dict["SQL"]["CONNECTION"]
+        self.database_urls = os.getenv("SENZING_DATABASE_URL", self.database_urls)
+        self.database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", self.database_urls)
         self.high_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK", high_watermark))
         self.hint = os.getenv("SENZING_GOVERNOR_HINT", hint)
         self.interval = int(os.getenv("SENZING_GOVERNOR_INTERVAL", interval))
