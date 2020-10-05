@@ -172,11 +172,11 @@ class Governor:
         if os.getenv("SENZING_ENGINE_CONFIGURATION_JSON") is not None:
             config_dict = json.loads(os.getenv("SENZING_ENGINE_CONFIGURATION_JSON"))
             self.database_urls = config_dict["SQL"]["CONNECTION"]
-        logging.info("!!!!!!!!!!!!! Governor.__init__() self.database_urls after SENZING_ENGINE_CONFIGURATION_JSON is " + self.database_urls)
+        logging.info("!!!!!!!!!!!!! Governor.__init__() self.database_urls after SENZING_ENGINE_CONFIGURATION_JSON is " + str(self.database_urls))
         self.database_urls = os.getenv("SENZING_DATABASE_URL", self.database_urls)
-        logging.info("!!!!!!!!!!!!! Governor.__init__() self.database_urls after SENZING_DATABASE_URL is " + self.database_urls)
+        logging.info("!!!!!!!!!!!!! Governor.__init__() self.database_urls after SENZING_DATABASE_URL is " + str(self.database_urls))
         self.database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", self.database_urls)
-        logging.info("!!!!!!!!!!!!! Governor.__init__() self.database_urls after SENZING_GOVERNOR_DATABASE_URLS is " + self.database_urls)
+        logging.info("!!!!!!!!!!!!! Governor.__init__() self.database_urls after SENZING_GOVERNOR_DATABASE_URLS is " + str(self.database_urls))
         self.high_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK", high_watermark))
         self.hint = os.getenv("SENZING_GOVERNOR_HINT", hint)
         self.interval = int(os.getenv("SENZING_GOVERNOR_INTERVAL", interval))
