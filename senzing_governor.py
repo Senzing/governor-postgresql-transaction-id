@@ -89,7 +89,7 @@ class Governor:
         # Detect an error condition where there are not enough safe characters.
 
         if len(unsafe_characters) > len(safe_characters):
-            logging.error(message_error(730, unsafe_characters, safe_characters))
+            logging.error("There are not enough safe characters to do the translation. Unsafe Characters: {0}; Safe Characters: {1}".format(unsafe_characters, safe_characters))
             return result
 
         # Perform translation.
