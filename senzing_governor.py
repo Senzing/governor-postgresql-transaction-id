@@ -28,12 +28,13 @@ import psycopg2
 import string
 import threading
 import time
+import json
 from urllib.parse import urlparse
 
 __all__ = []
-__version__ = "1.0.1"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.2"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2020-09-09'
+__updated__ = '2020-10-05'
 
 SENZING_PRODUCT_ID = "5017"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -88,7 +89,7 @@ class Governor:
         # Detect an error condition where there are not enough safe characters.
 
         if len(unsafe_characters) > len(safe_characters):
-            logging.error(message_error(730, unsafe_characters, safe_characters))
+            logging.error("There are not enough safe characters to do the translation. Unsafe Characters: {0}; Safe Characters: {1}".format(unsafe_characters, safe_characters))
             return result
 
         # Perform translation.
@@ -167,7 +168,15 @@ class Governor:
 
         self.counter = 0
         self.counter_lock = threading.Lock()
-        self.database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", database_urls)
+
+        # Database connection string. Precedence: 1) SENZING_GOVERNOR_DATABASE_URLS, 2) SENZING_DATABASE_URL, 3) SENZING_ENGINE_CONFIGURATION_JSON 4) parameters
+        self.database_urls = database_urls
+        if os.getenv("SENZING_ENGINE_CONFIGURATION_JSON") is not None:
+            config_dict = json.loads(os.getenv("SENZING_ENGINE_CONFIGURATION_JSON"))
+            self.database_urls = config_dict["SQL"]["CONNECTION"]
+        self.database_urls = os.getenv("SENZING_DATABASE_URL", self.database_urls)
+        self.database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", self.database_urls)
+
         self.high_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK", high_watermark))
         self.hint = os.getenv("SENZING_GOVERNOR_HINT", hint)
         self.interval = int(os.getenv("SENZING_GOVERNOR_INTERVAL", interval))
