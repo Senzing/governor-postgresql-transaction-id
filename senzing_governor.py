@@ -32,7 +32,7 @@ import json
 from urllib.parse import urlparse
 
 __all__ = []
-__version__ = "1.0.2"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.3"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
 __updated__ = '2020-10-23'
 
