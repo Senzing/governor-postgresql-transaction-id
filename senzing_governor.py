@@ -32,9 +32,9 @@ import json
 from urllib.parse import urlparse
 
 __all__ = []
-__version__ = "1.0.2"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.3"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2020-10-05'
+__updated__ = '2020-10-23'
 
 SENZING_PRODUCT_ID = "5017"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -155,7 +155,7 @@ class Governor:
         hint="",
         interval=100000,
         list_separator=',',
-        low_watermark=90000000,
+        low_watermark=200000000,
         check_time_interval_in_seconds=5,
         wait_time=60,
         *args,
