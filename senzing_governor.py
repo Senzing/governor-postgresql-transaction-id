@@ -26,6 +26,7 @@ import json
 import logging
 import os
 import psycopg2
+import re
 import string
 import threading
 import time
@@ -34,7 +35,7 @@ from urllib.parse import urlparse
 __all__ = []
 __version__ = "1.0.4"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2020-11-27'
+__updated__ = '2020-11-28'
 
 SENZING_PRODUCT_ID = "5017"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -123,6 +124,35 @@ class Governor:
 
         return result
 
+    def parse_string(format_string, string_to_be_parsed):
+        """
+        Match string_to_be_parsed against the given format string, return dictionary of matches.
+        See https://stackoverflow.com/questions/10663093/use-python-format-string-in-reverse-for-parsing
+        """
+
+        # First split on any keyword arguments, note that the names of keyword arguments will be in the
+        # 1st, 3rd, ... positions in this list
+
+        tokens = re.split(r'\{(.*?)\}', format_string)
+        keywords = tokens[1::2]
+
+        # Now replace keyword arguments with named groups matching them. We also escape between keyword
+        # arguments so we support meta-characters there. Re-join tokens to form our regexp pattern
+
+        tokens[1::2] = map(u'(?P<{}>.*)'.format, keywords)
+        tokens[0::2] = map(re.escape, tokens[0::2])
+        pattern = ''.join(tokens)
+
+        # Use our pattern to match the given string, raise if it doesn't match
+
+        matches = re.match(pattern, string_to_be_parsed)
+        if not matches:
+            raise Exception("Format string did not match")
+
+        # Return a dict with all of our keywords and their values
+
+        return {x: matches.group(x) for x in keywords}
+
     # -------------------------------------------------------------------------
     # Internal methods for extracting
     # -------------------------------------------------------------------------
@@ -130,13 +160,23 @@ class Governor:
     def extract_database_urls(self, config_json, default):
         if config_json:
             config_dict = json.loads(config_json)
-            result_list = [config_dict["SQL"]["CONNECTION"]]
+            database_urls = [config_dict["SQL"]["CONNECTION"]]
             hybrid = config_dict.get('HYBRID', {})
             database_keys = set(hybrid.values())
             for database_key in database_keys:
                 database = config_dict.get(database_key, {}).get("DB_1", None)
                 if database:
-                    result_list.append(database)
+                    database_urls.append(database)
+
+            # Transform Database URLs.
+
+            postgresql_url_input_template = "{scheme}://{username}:{password}@{hostname}:{port}:{schema}/"
+            postgresql_url_output = "{scheme}://{username}:{password}@{hostname}:{port}/{schema}"
+            result_list = []
+            for database_url in database_urls:
+                parsed_database_url = self.parse_string(postgresql_url_input_template, database_url)
+                result_list.append(postgresql_url_output_template.format(**parsed_database_url))
+
             result = ','.join(result_list)
         else:
             result = default
