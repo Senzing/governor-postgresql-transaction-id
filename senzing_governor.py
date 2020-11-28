@@ -229,6 +229,7 @@ class Governor:
         self.counter_lock = threading.Lock()
 
         # Database connection string. Precedence: 1) SENZING_GOVERNOR_DATABASE_URLS, 2) SENZING_DATABASE_URL, 3) SENZING_ENGINE_CONFIGURATION_JSON 4) parameters
+
         self.database_urls = database_urls
         self.database_urls = self.extract_database_urls(os.getenv("SENZING_ENGINE_CONFIGURATION_JSON"), self.database_urls)
         self.database_urls = os.getenv("SENZING_DATABASE_URL", self.database_urls)
