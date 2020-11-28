@@ -171,7 +171,7 @@ class Governor:
             # Transform Database URLs.
 
             postgresql_url_input_template = "{scheme}://{username}:{password}@{hostname}:{port}:{schema}"
-            postgresql_url_output = "{scheme}://{username}:{password}@{hostname}:{port}/{schema}"
+            postgresql_url_output_template = "{scheme}://{username}:{password}@{hostname}:{port}/{schema}"
             result_list = []
             for database_url in database_urls:
                 parsed_database_url = self.parse_string(postgresql_url_input_template, database_url)
