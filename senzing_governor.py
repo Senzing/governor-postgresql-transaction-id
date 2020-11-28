@@ -170,7 +170,7 @@ class Governor:
 
             # Transform Database URLs.
 
-            postgresql_url_input_template = "{scheme}://{username}:{password}@{hostname}:{port}:{schema}/"
+            postgresql_url_input_template = "{scheme}://{username}:{password}@{hostname}:{port}:{schema}"
             postgresql_url_output = "{scheme}://{username}:{password}@{hostname}:{port}/{schema}"
             result_list = []
             for database_url in database_urls:
