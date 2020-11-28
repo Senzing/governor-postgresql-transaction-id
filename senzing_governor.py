@@ -22,19 +22,20 @@
 # Full details on installation: https://www.psycopg.org/docs/install.html
 # --------------------------------------------------------------------------------------------------------------
 
+import json
 import logging
 import os
 import psycopg2
+import re
 import string
 import threading
 import time
-import json
 from urllib.parse import urlparse
 
 __all__ = []
-__version__ = "1.0.3"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.4"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2020-10-23'
+__updated__ = '2020-11-28'
 
 SENZING_PRODUCT_ID = "5017"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -123,6 +124,64 @@ class Governor:
 
         return result
 
+    def parse_string(self, format_string, string_to_be_parsed):
+        """
+        Match string_to_be_parsed against the given format string, return dictionary of matches.
+        See https://stackoverflow.com/questions/10663093/use-python-format-string-in-reverse-for-parsing
+        """
+
+        # First split on any keyword arguments, note that the names of keyword arguments will be in the
+        # 1st, 3rd, ... positions in this list
+
+        tokens = re.split(r'\{(.*?)\}', format_string)
+        keywords = tokens[1::2]
+
+        # Now replace keyword arguments with named groups matching them. We also escape between keyword
+        # arguments so we support meta-characters there. Re-join tokens to form our regexp pattern
+
+        tokens[1::2] = map(u'(?P<{}>.*)'.format, keywords)
+        tokens[0::2] = map(re.escape, tokens[0::2])
+        pattern = ''.join(tokens)
+
+        # Use our pattern to match the given string, raise if it doesn't match
+
+        matches = re.match(pattern, string_to_be_parsed)
+        if not matches:
+            raise Exception("Format string did not match")
+
+        # Return a dict with all of our keywords and their values
+
+        return {x: matches.group(x) for x in keywords}
+
+    # -------------------------------------------------------------------------
+    # Internal methods for extracting
+    # -------------------------------------------------------------------------
+
+    def extract_database_urls(self, config_json, default):
+        if config_json:
+            config_dict = json.loads(config_json)
+            database_urls = [config_dict["SQL"]["CONNECTION"]]
+            hybrid = config_dict.get('HYBRID', {})
+            database_keys = set(hybrid.values())
+            for database_key in database_keys:
+                database = config_dict.get(database_key, {}).get("DB_1", None)
+                if database:
+                    database_urls.append(database)
+
+            # Transform Database URLs.
+
+            postgresql_url_input_template = "{scheme}://{username}:{password}@{hostname}:{port}:{schema}"
+            postgresql_url_output_template = "{scheme}://{username}:{password}@{hostname}:{port}/{schema}"
+            result_list = []
+            for database_url in database_urls:
+                parsed_database_url = self.parse_string(postgresql_url_input_template, database_url)
+                result_list.append(postgresql_url_output_template.format(**parsed_database_url))
+
+            result = ','.join(result_list)
+        else:
+            result = default
+        return result
+
     # -------------------------------------------------------------------------
     # Internal methods for accessing database.
     # -------------------------------------------------------------------------
@@ -170,10 +229,9 @@ class Governor:
         self.counter_lock = threading.Lock()
 
         # Database connection string. Precedence: 1) SENZING_GOVERNOR_DATABASE_URLS, 2) SENZING_DATABASE_URL, 3) SENZING_ENGINE_CONFIGURATION_JSON 4) parameters
+
         self.database_urls = database_urls
-        if os.getenv("SENZING_ENGINE_CONFIGURATION_JSON") is not None:
-            config_dict = json.loads(os.getenv("SENZING_ENGINE_CONFIGURATION_JSON"))
-            self.database_urls = config_dict["SQL"]["CONNECTION"]
+        self.database_urls = self.extract_database_urls(os.getenv("SENZING_ENGINE_CONFIGURATION_JSON"), self.database_urls)
         self.database_urls = os.getenv("SENZING_DATABASE_URL", self.database_urls)
         self.database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", self.database_urls)
 
@@ -244,9 +302,10 @@ class Governor:
 
                 for database_connection in self.database_connections.values():
                     cursor = database_connection.get("cursor")
+                    database_host = database_connection.get("parsed_database_url", {}).get("host")
                     database_name = database_connection.get("parsed_database_url", {}).get("dbname")
                     watermark = self.get_current_watermark(cursor, database_name)
-                    logging.info("senzing-{0}0004I Governor is checking PostgreSQL Transaction IDs. Database: {1}; Current XID: {2}; High watermark XID: {3}".format(SENZING_PRODUCT_ID, database_name, watermark, self.high_watermark))
+                    logging.info("senzing-{0}0004I Governor is checking PostgreSQL Transaction IDs. Host: {1}; Database: {2}; Current XID: {3}; High watermark XID: {4}".format(SENZING_PRODUCT_ID, database_host, database_name, watermark, self.high_watermark))
                     if watermark > self.high_watermark:
 
                         # If above high watermark, wait until watermark is below low_watermark.
@@ -266,4 +325,29 @@ class Governor:
 
 
 if __name__ == '__main__':
-    pass
+
+    # Configure logging. See https://docs.python.org/2/library/logging.html#levels
+
+    log_level_map = {
+        "notset": logging.NOTSET,
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "fatal": logging.FATAL,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL
+    }
+
+    log_level_parameter = os.getenv("SENZING_LOG_LEVEL", "info").lower()
+    log_level = log_level_map.get(log_level_parameter, logging.INFO)
+    logging.basicConfig(format=log_format, level=log_level)
+
+    # Create governor.
+
+    governor = Governor()
+
+    # Print databases specified by environment variables.
+
+    sql_connection_strings = governor.database_urls.split(governor.list_separator)
+    for sql_connection_string in sql_connection_strings:
+        logging.info("senzing-{0}0007I Database: {1}".format(SENZING_PRODUCT_ID, sql_connection_string))
