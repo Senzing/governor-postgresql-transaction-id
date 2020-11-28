@@ -124,7 +124,7 @@ class Governor:
 
         return result
 
-    def parse_string(format_string, string_to_be_parsed):
+    def parse_string(self, format_string, string_to_be_parsed):
         """
         Match string_to_be_parsed against the given format string, return dictionary of matches.
         See https://stackoverflow.com/questions/10663093/use-python-format-string-in-reverse-for-parsing
