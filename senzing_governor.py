@@ -301,9 +301,10 @@ class Governor:
 
                 for database_connection in self.database_connections.values():
                     cursor = database_connection.get("cursor")
+                    database_host = database_connection.get("parsed_database_url", {}).get("host")
                     database_name = database_connection.get("parsed_database_url", {}).get("dbname")
                     watermark = self.get_current_watermark(cursor, database_name)
-                    logging.info("senzing-{0}0004I Governor is checking PostgreSQL Transaction IDs. Database: {1}; Current XID: {2}; High watermark XID: {3}".format(SENZING_PRODUCT_ID, database_name, watermark, self.high_watermark))
+                    logging.info("senzing-{0}0004I Governor is checking PostgreSQL Transaction IDs. Host: {1}; Database: {2}; Current XID: {3}; High watermark XID: {4}".format(SENZING_PRODUCT_ID, database_host, database_name, watermark, self.high_watermark))
                     if watermark > self.high_watermark:
 
                         # If above high watermark, wait until watermark is below low_watermark.
