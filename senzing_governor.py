@@ -22,19 +22,19 @@
 # Full details on installation: https://www.psycopg.org/docs/install.html
 # --------------------------------------------------------------------------------------------------------------
 
+import json
 import logging
 import os
 import psycopg2
 import string
 import threading
 import time
-import json
 from urllib.parse import urlparse
 
 __all__ = []
-__version__ = "1.0.3"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.4"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2020-10-23'
+__updated__ = '2020-11-27'
 
 SENZING_PRODUCT_ID = "5017"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -124,6 +124,25 @@ class Governor:
         return result
 
     # -------------------------------------------------------------------------
+    # Internal methods for extracting
+    # -------------------------------------------------------------------------
+
+    def extract_database_urls(self, config_json, default):
+        if config_json:
+            config_dict = json.loads(config_json)
+            result_list = [config_dict["SQL"]["CONNECTION"]]
+            hybrid = config_dict.get('HYBRID', {})
+            database_keys = set(hybrid.values())
+            for database_key in database_keys:
+                database = config_dict.get(database_key, {}).get("DB_1", None)
+                if database:
+                    result_list.append(database)
+            result = ','.join(result_list)
+        else:
+            result = default
+        return result
+
+    # -------------------------------------------------------------------------
     # Internal methods for accessing database.
     # -------------------------------------------------------------------------
 
@@ -171,9 +190,7 @@ class Governor:
 
         # Database connection string. Precedence: 1) SENZING_GOVERNOR_DATABASE_URLS, 2) SENZING_DATABASE_URL, 3) SENZING_ENGINE_CONFIGURATION_JSON 4) parameters
         self.database_urls = database_urls
-        if os.getenv("SENZING_ENGINE_CONFIGURATION_JSON") is not None:
-            config_dict = json.loads(os.getenv("SENZING_ENGINE_CONFIGURATION_JSON"))
-            self.database_urls = config_dict["SQL"]["CONNECTION"]
+        self.database_urls = self.extract_database_urls(os.getenv("SENZING_ENGINE_CONFIGURATION_JSON"), self.database_urls)
         self.database_urls = os.getenv("SENZING_DATABASE_URL", self.database_urls)
         self.database_urls = os.getenv("SENZING_GOVERNOR_DATABASE_URLS", self.database_urls)
 
@@ -266,4 +283,29 @@ class Governor:
 
 
 if __name__ == '__main__':
-    pass
+
+    # Configure logging. See https://docs.python.org/2/library/logging.html#levels
+
+    log_level_map = {
+        "notset": logging.NOTSET,
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "fatal": logging.FATAL,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL
+    }
+
+    log_level_parameter = os.getenv("SENZING_LOG_LEVEL", "info").lower()
+    log_level = log_level_map.get(log_level_parameter, logging.INFO)
+    logging.basicConfig(format=log_format, level=log_level)
+
+    # Create governor.
+
+    governor = Governor()
+
+    # Print databases specified by environment variables.
+
+    sql_connection_strings = governor.database_urls.split(governor.list_separator)
+    for sql_connection_string in sql_connection_strings:
+        logging.info("senzing-{0}0007I Database: {1}".format(SENZING_PRODUCT_ID, sql_connection_string))
