@@ -210,11 +210,11 @@ class Governor:
     def __init__(
         self,
         database_urls=None,
-        high_watermark=1000000000,
+        high_watermark=1_000_000_000,
         hint="",
-        interval=100000,
+        interval=100_000,
         list_separator=',',
-        low_watermark=200000000,
+        low_watermark=200_000_000,
         check_time_interval_in_seconds=5,
         wait_time=60,
         *args,
@@ -278,6 +278,46 @@ class Governor:
                     'cursor': cursor,
                 }
 
+    def get_wait_time(self, watermark):
+        """
+        There are several strategies one could use for determining wait time.
+        We are implementing a static step function.  Another option is to
+        use an exponential (or linear) backoff strategy.  Yet another option is
+        to use a combination of the two where you smoothly ramp up wait time
+        between stepped ranges.
+        """
+
+        wait_time = 0
+        watermark_delta = self.high_watermark - self.low_watermark
+        watermark_ratio = (watermark - self.low_watermark) / watermark_delta
+
+        # an example of an exponential backoff strategy would be:
+        # watermark_percentage = watermark_ratio * 100
+        # wait_time = ((1.1**watermark_percentage)-1)/100
+
+        # the commented out calc_time is an example of smothing the step function
+
+        if( watermark_ratio <= 0.1 ):
+            wait_time = 0.01
+            # calc_time = round(watermark_ratio,2)
+        elif( watermark_ratio <= 0.2 ):
+            wait_time = 0.1
+            # calc_time = round(watermark_ratio / 2, 1)
+        elif( watermark_ratio <= 0.4 ):
+            wait_time = 1
+            # calc_time = round(watermark_ratio * 10 / 4, 1)
+        elif( watermark_ratio <= 0.8 ):
+            wait_time = 10
+            # calc_time = round(watermark_ratio * 100 / 8, 1)
+        elif( watermark_ratio <= 1 ):
+            wait_time = 100
+            # calc_time = round(watermark_ratio * 100, 1)
+        elif( watermark_ratio > 1 ):
+            wait_time = 100
+            # calc_time = round(watermark_ratio * 100, 1)
+
+        return wait_time
+
     def govern(self, *args, **kwargs):
         """
         Do the actual "governing".
@@ -306,14 +346,19 @@ class Governor:
                     database_name = database_connection.get("parsed_database_url", {}).get("dbname")
                     watermark = self.get_current_watermark(cursor, database_name)
                     logging.info("senzing-{0}0004I Governor is checking PostgreSQL Transaction IDs. Host: {1}; Database: {2}; Current XID: {3}; High watermark XID: {4}".format(SENZING_PRODUCT_ID, database_host, database_name, watermark, self.high_watermark))
-                    if watermark > self.high_watermark:
 
-                        # If above high watermark, wait until watermark is below low_watermark.
+                    # When we get above the low water mark, use our wait time
+                    # function to start to slow down.
 
-                        while watermark > self.low_watermark:
+                    old_wait_time = 0
+
+                    while watermark > self.low_watermark:
+                        wait_time = self.get_wait_time(watermark)
+                        if (wait_time != old_wait_time ):
                             logging.info("senzing-{0}0005I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} to low watermark of {4}.".format(SENZING_PRODUCT_ID, self.wait_time, database_name, watermark, self.low_watermark))
-                            time.sleep(self.wait_time)
-                            watermark = self.get_current_watermark(cursor, database_name)
+                            old_wait_time = wait_time
+                        time.sleep(wait_time)
+                        watermark = self.get_current_watermark(cursor, database_name)
 
     def close(self, *args, **kwargs):
         '''  Tasks to perform when shutting down, e.g., close DB connections '''
