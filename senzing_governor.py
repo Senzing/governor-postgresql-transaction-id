@@ -214,7 +214,7 @@ class Governor:
         hint="",
         interval=100_000,
         list_separator=',',
-        low_watermark=200_000_000,
+        low_watermark=500_000_000,
         check_time_interval_in_seconds=5,
         wait_time=60,
         *args,
