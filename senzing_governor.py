@@ -354,7 +354,7 @@ class Governor:
 
                     while watermark > self.low_watermark:
                         wait_time = self.get_wait_time(watermark)
-                        if (wait_time != old_wait_time ):
+                        if (wait_time != old_wait_time):
                             logging.info("senzing-{0}0005I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} to low watermark of {4}.".format(SENZING_PRODUCT_ID, self.wait_time, database_name, watermark, self.low_watermark))
                             old_wait_time = wait_time
                         time.sleep(wait_time)
