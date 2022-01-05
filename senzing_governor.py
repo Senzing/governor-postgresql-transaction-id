@@ -30,7 +30,6 @@ import re
 import string
 import threading
 import time
-import datetime
 from urllib.parse import urlparse
 
 __all__ = []
@@ -349,8 +348,8 @@ class Governor:
                     database_name = database_connection.get("parsed_database_url", {}).get("dbname")
                     watermark = self.get_current_watermark(cursor, database_name)
 
-                    current_log_time = datetime.datetime.now()
-                    if (((current_log_time - last_log_time).total_seconds() / 60) > 10):
+                    current_log_time = time.time()
+                    if (((current_log_time - last_log_time) / 60) > 10):
                         logging.info("senzing-{0}0004I Governor is checking PostgreSQL Transaction IDs. Host: {1}; Database: {2}; Current XID: {3}; High watermark XID: {4}".format(SENZING_PRODUCT_ID, database_host, database_name, watermark, self.high_watermark))
                         last_log_time = current_log_time
 
@@ -361,9 +360,9 @@ class Governor:
 
                     while watermark > self.low_watermark:
                         wait_time = self.get_wait_time(watermark)
-                        current_log_time = datetime.datetime.now()
+                        current_log_time = time.time()
                         # log a message when the wait_time changes OR if 10 minutes have passed
-                        if (wait_time != old_wait_time) or (((current_log_time - last_log_time).total_seconds() / 60) > 10):
+                        if (wait_time != old_wait_time) or (((current_log_time - last_log_time) / 60) > 10):
                             logging.info("senzing-{0}0005I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} to low watermark of {4}.".format(SENZING_PRODUCT_ID, self.wait_time, database_name, watermark, self.low_watermark))
                             old_wait_time = wait_time
                             last_log_time = current_log_time
