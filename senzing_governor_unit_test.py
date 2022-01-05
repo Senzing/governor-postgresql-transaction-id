@@ -47,6 +47,15 @@ class TestGetWaitTime(unittest.TestCase):
 
     def test_get_wait_time_step_5(self):
         """
+        Test ratio <= 0.8
+        """
+        governor = Governor(hint="Tester")
+        result = governor.get_wait_time(900_000_000)
+        self.assertEqual(result, 10)
+        governor.close()
+
+    def test_get_wait_time_step_6(self):
+        """
         Test ratio <= 1
         """
         governor = Governor(hint="Tester")
@@ -54,7 +63,7 @@ class TestGetWaitTime(unittest.TestCase):
         self.assertEqual(result, 100)
         governor.close()
 
-    def test_get_wait_time_step_6(self):
+    def test_get_wait_time_step_7(self):
         """
         Test ratio > 1
         """

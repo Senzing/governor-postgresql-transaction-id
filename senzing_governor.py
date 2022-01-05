@@ -228,6 +228,19 @@ class Governor:
         self.counter = 0
         self.counter_lock = threading.Lock()
         self.last_log_time = 0
+        # update this data structure to change the back-off step times.
+        #  1.0 means that we're at the highwater mark so we should pause longer
+        #  to allow the database to catch up.  More steps could be added or times
+        #  modified to fit required performance characteristics.
+        # <ratio>:<time in seconds>
+        self.step_ratios = {
+            1.0: 100,
+            0.8: 100,
+            0.4: 10,
+            0.2: 1,
+            0.1: 0.1,
+            0.0: 0.01,
+        }
 
         # Database connection string. Precedence: 1) SENZING_GOVERNOR_DATABASE_URLS, 2) SENZING_DATABASE_URL, 3) SENZING_ENGINE_CONFIGURATION_JSON 4) parameters
 
@@ -296,26 +309,9 @@ class Governor:
         # watermark_percentage = watermark_ratio * 100
         # wait_time = ((1.1**watermark_percentage)-1)/100
 
-        # the commented out calc_time is an example of smothing the step function
-
-        if( watermark_ratio <= 0.1 ):
-            wait_time = 0.01
-            # calc_time = round(watermark_ratio,2)
-        elif( watermark_ratio <= 0.2 ):
-            wait_time = 0.1
-            # calc_time = round(watermark_ratio / 2, 1)
-        elif( watermark_ratio <= 0.4 ):
-            wait_time = 1
-            # calc_time = round(watermark_ratio * 10 / 4, 1)
-        elif( watermark_ratio <= 0.8 ):
-            wait_time = 10
-            # calc_time = round(watermark_ratio * 100 / 8, 1)
-        elif( watermark_ratio <= 1 ):
-            wait_time = 100
-            # calc_time = round(watermark_ratio * 100, 1)
-        elif( watermark_ratio > 1 ):
-            wait_time = 100
-            # calc_time = round(watermark_ratio * 100, 1)
+        for ratio, wait_time in self.step_ratios.items():
+            if watermark_ratio > ratio:
+                return wait_time
 
         return wait_time
 
