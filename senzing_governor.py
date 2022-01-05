@@ -357,7 +357,7 @@ class Governor:
                         wait_time = self.get_wait_time(watermark)
                         current_log_time = time.time()
                         # log a message when the wait_time changes OR if 10 minutes have passed
-                        if (wait_time != old_wait_time) or (((current_log_time - last_log_time) / 60) > 10):
+                        if (wait_time != old_wait_time) or (((current_log_time - self.last_log_time) / 60) > 10):
                             logging.info("senzing-{0}0005I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} to low watermark of {4}.".format(SENZING_PRODUCT_ID, wait_time, database_name, watermark, self.low_watermark))
                             old_wait_time = wait_time
                             self.last_log_time = current_log_time
