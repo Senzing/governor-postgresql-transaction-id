@@ -30,6 +30,7 @@ import re
 import string
 import threading
 import time
+import datetime
 from urllib.parse import urlparse
 
 __all__ = []
@@ -351,12 +352,16 @@ class Governor:
                     # function to start to slow down.
 
                     old_wait_time = 0
+                    last_log_time = 0
 
                     while watermark > self.low_watermark:
                         wait_time = self.get_wait_time(watermark)
-                        if (wait_time != old_wait_time):
+                        current_log_time = datetime.datetime.now()
+                        # log a message when the wait_time changes OR if 10 minutes have passed
+                        if (wait_time != old_wait_time) or (((current_log_time - old_log_time).total_seconds() / 60) > 10):
                             logging.info("senzing-{0}0005I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} to low watermark of {4}.".format(SENZING_PRODUCT_ID, self.wait_time, database_name, watermark, self.low_watermark))
                             old_wait_time = wait_time
+                            old_log_time = current_log_time
                         time.sleep(wait_time)
                         watermark = self.get_current_watermark(cursor, database_name)
 
