@@ -233,14 +233,14 @@ class Governor:
         #  to allow the database to catch up.  More steps could be added or times
         #  modified to fit required performance characteristics.
         # <ratio>:<time in seconds>
-        self.step_ratios = {
-            1.0: 100,
-            0.8: 100,
-            0.4: 10,
-            0.2: 1,
-            0.1: 0.1,
-            0.0: 0.01,
-        }
+        self.step_ratios = [
+            (1.0, 100),
+            (0.8, 100),
+            (0.4, 10),
+            (0.2, 1),
+            (0.1, 0.1),
+            (0.0, 0.01),
+        ]
 
         # Database connection string. Precedence: 1) SENZING_GOVERNOR_DATABASE_URLS, 2) SENZING_DATABASE_URL, 3) SENZING_ENGINE_CONFIGURATION_JSON 4) parameters
 
@@ -301,7 +301,6 @@ class Governor:
         between stepped ranges.
         """
 
-        wait_time = 0
         watermark_delta = self.high_watermark - self.low_watermark
         watermark_ratio = (watermark - self.low_watermark) / watermark_delta
 
@@ -309,11 +308,11 @@ class Governor:
         # watermark_percentage = watermark_ratio * 100
         # wait_time = ((1.1**watermark_percentage)-1)/100
 
-        for ratio, wait_time in self.step_ratios.items():
-            if watermark_ratio > ratio:
-                return wait_time
+        for step in self.step_ratios:
+            if watermark_ratio > step[0]:
+                return step[1]
 
-        return wait_time
+        return 0
 
     def govern(self, *args, **kwargs):
         """
