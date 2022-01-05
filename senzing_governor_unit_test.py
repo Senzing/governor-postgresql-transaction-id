@@ -8,8 +8,6 @@ __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2022-01-05'
 __updated__ = '2022-01-05'
 
-
-
 class TestGetWaitTime(unittest.TestCase):
     def test_get_wait_time_step_1(self):
         """
