@@ -215,7 +215,7 @@ class Governor:
         interval=100_000,
         list_separator=',',
         low_watermark=500_000_000,
-        log_interval_in_minutes=10,
+        log_interval_in_seconds=600,
         check_time_interval_in_seconds=5,
         *args,
         **kwargs
@@ -256,8 +256,8 @@ class Governor:
         self.low_watermark = int(os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", low_watermark))
         self.sql_stmt = "SELECT age(datfrozenxid) FROM pg_database WHERE datname = (%s);"
         self.check_time_interval_in_seconds = int(os.getenv("SENZING_GOVERNOR_CHECK_TIME_INTERVAL_IN_SECONDS", check_time_interval_in_seconds))
-        self.log_interval_in_minutes = int(os.getenv("SENZING_GOVERNOR_LOG_INTERVAL_IN_MINUTES", log_interval_in_minutes))
-        logging.info("senzing-{0}0002I SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK: {1}; SENZING_GOVERNOR_INTERVAL: {2}; SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK {3}; SENZING_GOVERNOR_WAIT: {4}; SENZING_GOVERNOR_HINT: {5}".format(SENZING_PRODUCT_ID, self.high_watermark, self.interval, self.low_watermark, self.wait_time, self.hint))
+        self.log_interval_in_seconds = int(os.getenv("SENZING_GOVERNOR_LOG_INTERVAL_IN_SECONDS", log_interval_in_seconds))
+        logging.info("senzing-{0}0002I SENZING_GOVERNOR_POSTGRESQL_HIGH_WATERMARK: {1}; SENZING_GOVERNOR_INTERVAL: {2}; SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK {3}; SENZING_GOVERNOR_HINT: {4}; SENZING_GOVERNOR_LOG_INTERVAL_IN_SECONDS: {5}".format(SENZING_PRODUCT_ID, self.high_watermark, self.interval, self.low_watermark, self.hint, self.log_interval_in_seconds))
 
         # Synthesize variables.
 
@@ -343,8 +343,8 @@ class Governor:
                     watermark = self.get_current_watermark(cursor, database_name)
 
                     current_log_time = time.time()
-                    # only log a message every 10 minutes
-                    if (((current_log_time - self.last_log_time) / 60) > self.log_interval_in_minutes):
+                    # only log a message when the log interval has passed
+                    if ((current_log_time - self.last_log_time) > self.log_interval_in_seconds):
                         logging.info("senzing-{0}0004I Governor is checking PostgreSQL Transaction IDs. Host: {1}; Database: {2}; Current XID: {3}; High watermark XID: {4}".format(SENZING_PRODUCT_ID, database_host, database_name, watermark, self.high_watermark))
                         self.last_log_time = current_log_time
 
@@ -356,8 +356,8 @@ class Governor:
                     while watermark > self.low_watermark:
                         wait_time = self.get_wait_time(watermark)
                         current_log_time = time.time()
-                        # log a message when the wait_time changes OR if 10 minutes have passed
-                        if (wait_time != old_wait_time) or (((current_log_time - self.last_log_time) / 60) > self.log_interval_in_minutes):
+                        # log a message when the wait_time changes OR if the log interval has passed
+                        if (wait_time != old_wait_time) or ((current_log_time - self.last_log_time) > self.log_interval_in_seconds):
                             logging.info("senzing-{0}0005I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} to low watermark of {4}.".format(SENZING_PRODUCT_ID, wait_time, database_name, watermark, self.low_watermark))
                             old_wait_time = wait_time
                             self.last_log_time = current_log_time
