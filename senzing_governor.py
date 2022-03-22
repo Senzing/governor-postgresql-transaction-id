@@ -22,20 +22,27 @@
 # Full details on installation: https://www.psycopg.org/docs/install.html
 # --------------------------------------------------------------------------------------------------------------
 
+# Import from standard library. https://docs.python.org/3/library/
+
+from urllib.parse import urlparse
 import json
 import logging
 import os
-import psycopg2
 import re
 import string
 import threading
 import time
-from urllib.parse import urlparse
+
+# Import from https://pypi.org/
+
+import psycopg2
+
+# Metadata
 
 __all__ = []
-__version__ = "1.0.4"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.5"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2020-11-28'
+__updated__ = '2022-03-22'
 
 SENZING_PRODUCT_ID = "5017"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
