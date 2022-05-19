@@ -40,9 +40,9 @@ import psycopg2
 # Metadata
 
 __all__ = []
-__version__ = "1.0.5"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.6"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2022-03-22'
+__updated__ = '2022-05-19'
 
 SENZING_PRODUCT_ID = "5017"  # See https://github.com/Senzing/knowledge-base/blob/main/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -217,11 +217,11 @@ class Governor:
     def __init__(
         self,
         database_urls=None,
-        high_watermark=1000000000,
+        high_watermark=1500000000,
         hint="",
         interval=100000,
         list_separator=',',
-        low_watermark=200000000,
+        low_watermark=1200000000,
         check_time_interval_in_seconds=5,
         wait_time=60,
         *args,
