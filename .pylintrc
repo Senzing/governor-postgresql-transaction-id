@@ -1,0 +1,27 @@
+[pylint]
+disable=
+    consider-using-f-string,
+    duplicate-code,
+    import-error,
+    invalid-name,
+    keyword-arg-before-vararg,
+    line-too-long,
+    logging-format-interpolation,
+    missing-class-docstring,
+    missing-function-docstring,
+    missing-module-docstring,
+    no-self-use,
+    redefined-builtin,
+    redefined-outer-name,
+    redundant-u-string-prefix,
+    too-many-arguments,
+    too-many-instance-attributes,
+    too-many-locals,
+    unused-argument,
+    unused-import,
+good-names=
+    template-python
+ignore=
+    __init__.py,
+notes=
+    FIXME,
