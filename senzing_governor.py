@@ -200,10 +200,11 @@ class Governor:
     # Internal methods for accessing database.
     # -------------------------------------------------------------------------
 
-    def get_current_watermark(self, cursor, database_name):
+    def get_current_watermark(self, cursor):
 
-        cursor.execute(self.sql_stmt, [database_name])
-        return cursor.fetchone()[0]
+        cursor.execute(self.sql_stmt)
+        result = cursor.fetchone()
+        return result[0], result[1]
 
     # -------------------------------------------------------------------------
     # Support for Python Context Manager.
@@ -275,7 +276,7 @@ class Governor:
             "SENZING_GOVERNOR_LIST_SEPARATOR", list_separator)
         self.low_watermark = int(
             os.getenv("SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK", low_watermark))
-        self.sql_stmt = "SELECT age(datfrozenxid) FROM pg_database WHERE datname = (%s);"
+        self.sql_stmt = "SELECT c.oid::regclass, age(c.relfrozenxid), pg_size_pretty(pg_total_relation_size(c.oid)) FROM pg_class c JOIN pg_namespace n on c.relnamespace = n.oid WHERE relkind IN ('r', 't', 'm') AND n.nspname NOT IN ('pg_toast') ORDER BY 2 DESC LIMIT 1;"
         self.check_time_interval_in_seconds = int(os.getenv(
             "SENZING_GOVERNOR_CHECK_TIME_INTERVAL_IN_SECONDS", check_time_interval_in_seconds))
         self.log_interval_in_seconds = int(
@@ -371,14 +372,13 @@ class Governor:
                         "parsed_database_url", {}).get("host")
                     database_name = database_connection.get(
                         "parsed_database_url", {}).get("dbname")
-                    watermark = self.get_current_watermark(
-                        cursor, database_name)
+                    oid_name, watermark = self.get_current_watermark(cursor)
 
                     current_log_time = time.time()
                     # only log a message when the log interval has passed
                     if ((current_log_time - self.last_log_time) > self.log_interval_in_seconds):
-                        logging.info("senzing-{0}0004I Governor is checking PostgreSQL Transaction IDs. Host: {1}; Database: {2}; Current XID: {3}; High watermark XID: {4}".format(
-                            SENZING_PRODUCT_ID, database_host, database_name, watermark, self.high_watermark))
+                        logging.info("senzing-{0}0004I Governor is checking PostgreSQL Transaction IDs. Host: {1}; Database: {2}; Current XID: {3} ({4}); High watermark XID: {5}".format(
+                            SENZING_PRODUCT_ID, database_host, database_name, watermark, oid_name, self.high_watermark))
                         self.last_log_time = current_log_time
 
                     # When we get above the low water mark, use our wait time
@@ -391,13 +391,13 @@ class Governor:
                         current_log_time = time.time()
                         # log a message when the wait_time changes OR if the log interval has passed
                         if (wait_time != old_wait_time) or ((current_log_time - self.last_log_time) > self.log_interval_in_seconds):
-                            logging.info("senzing-{0}0005I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} to low watermark of {4}.".format(
-                                SENZING_PRODUCT_ID, wait_time, database_name, watermark, self.low_watermark))
+                            logging.info("senzing-{0}0005I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} ({4}) to low watermark of {5}.".format(
+                                SENZING_PRODUCT_ID, wait_time, database_name, watermark, oid_name, self.low_watermark))
                             old_wait_time = wait_time
                             self.last_log_time = current_log_time
                         time.sleep(wait_time)
-                        watermark = self.get_current_watermark(
-                            cursor, database_name)
+                        oid_name, watermark = self.get_current_watermark(
+                            cursor)
 
     def close(self, *args, **kwargs):
         '''  Tasks to perform when shutting down, e.g., close DB connections '''
