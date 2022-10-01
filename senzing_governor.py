@@ -241,6 +241,7 @@ class Governor:
 
         # Instance variables. Precedence: 1) OS Environment variables, 2) parameters
 
+        self.old_wait_time = 0
         self.counter = 0
         self.counter_lock = threading.Lock()
         self.last_log_time = 0
@@ -384,20 +385,20 @@ class Governor:
                     # When we get above the low water mark, use our wait time
                     # function to start to slow down.
 
-                    old_wait_time = 0
-
-                    while watermark > self.low_watermark:
+                    if watermark > self.low_watermark: # This all needs to be done based on the worst XID if all DBs
                         wait_time = self.get_wait_time(watermark)
                         current_log_time = time.time()
                         # log a message when the wait_time changes OR if the log interval has passed
-                        if (wait_time != old_wait_time) or ((current_log_time - self.last_log_time) > self.log_interval_in_seconds):
+                        if (wait_time != self.old_wait_time) or ((current_log_time - self.last_log_time) > self.log_interval_in_seconds):
                             logging.info("senzing-{0}0005I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} ({4}) to low watermark of {5}.".format(
                                 SENZING_PRODUCT_ID, wait_time, database_name, watermark, oid_name, self.low_watermark))
-                            old_wait_time = wait_time
+                            self.old_wait_time = wait_time
                             self.last_log_time = current_log_time
-                        time.sleep(wait_time)
-                        oid_name, watermark = self.get_current_watermark(
-                            cursor)
+                    elif self.old_wait_time != 0:
+                        logging.info("Governor delay ended. Returning to no wait.")
+                        self.old_wait_time = 0
+        if self.old_wait_time > 0: # wait while not holding lock
+            time.sleep(self.old_wait_time)
 
     def close(self, *args, **kwargs):
         '''  Tasks to perform when shutting down, e.g., close DB connections '''
