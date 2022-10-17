@@ -240,8 +240,7 @@ class Governor:
             SENZING_PRODUCT_ID, __version__, __updated__))
 
         # Instance variables. Precedence: 1) OS Environment variables, 2) parameters
-
-        self.old_wait_time = 0
+        self.old_wait_time = 0.0
         self.counter = 0
         self.counter_lock = threading.Lock()
         self.last_log_time = 0
@@ -251,12 +250,17 @@ class Governor:
         #  modified to fit required performance characteristics.
         # <ratio>:<time in seconds>
         self.step_ratios = [
-            (1.0, 100),
-            (0.8, 100),
-            (0.4, 10),
-            (0.2, 1),
+            (1.0, -1.0),
+            (0.9, 9.0),
+            (0.8, 6.0),
+            (0.7, 4.0),
+            (0.6, 2.0),
+            (0.5, 1.0),
+            (0.4, 0.7),
+            (0.3, 0.5),
+            (0.2, 0.2),
             (0.1, 0.1),
-            (0.0, 0.01),
+            (0.0, 0.0),
         ]
 
         # Database connection string. Precedence: 1) SENZING_GOVERNOR_DATABASE_URLS, 2) SENZING_DATABASE_URL, 3) SENZING_ENGINE_CONFIGURATION_JSON 4) parameters
@@ -394,11 +398,10 @@ class Governor:
                                 SENZING_PRODUCT_ID, wait_time, database_name, watermark, oid_name, self.low_watermark))
                             self.old_wait_time = wait_time
                             self.last_log_time = current_log_time
-                    elif self.old_wait_time != 0:
-                        logging.info("Governor delay ended. Returning to no wait.")
-                        self.old_wait_time = 0
-        if self.old_wait_time > 0: # wait while not holding lock
-            time.sleep(self.old_wait_time)
+                    elif self.old_wait_time != 0.0:
+                        logging.info("senzing-{0}0006I Governor delay ended. Returning to no wait.".format(SENZING_PRODUCT_ID))
+                        self.old_wait_time = 0.0
+        return self.old_wait_time
 
     def close(self, *args, **kwargs):
         '''  Tasks to perform when shutting down, e.g., close DB connections '''
@@ -407,7 +410,7 @@ class Governor:
             database_connection.get('cursor').close()
             database_connection.get('connection').close()
         logging.info(
-            "senzing-{0}0006I Governor closed.".format(SENZING_PRODUCT_ID))
+            "senzing-{0}0007I Governor closed.".format(SENZING_PRODUCT_ID))
 
 
 if __name__ == '__main__':
@@ -438,4 +441,4 @@ if __name__ == '__main__':
         governor.list_separator)
     for sql_connection_string in sql_connection_strings:
         logging.info(
-            "senzing-{0}0007I Database: {1}".format(SENZING_PRODUCT_ID, sql_connection_string))
+            "senzing-{0}0008I Database: {1}".format(SENZING_PRODUCT_ID, sql_connection_string))
