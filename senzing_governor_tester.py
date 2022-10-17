@@ -93,5 +93,10 @@ if __name__ == '__main__':
     logging.info(f'wm: 950_000_000  wait_time={governor.get_wait_time(950_000_000)}')
     logging.info(f'wm: 1_000_000_000  wait_time={governor.get_wait_time(1_000_000_000)}')
     logging.info(f'wm: 1_100_000_000  wait_time={governor.get_wait_time(1_100_000_000)}')
+    logging.info(f'wm: 1_200_000_000  wait_time={governor.get_wait_time(1_200_000_000)}')
+    logging.info(f'wm: 1_300_000_000  wait_time={governor.get_wait_time(1_300_000_000)}')
+    logging.info(f'wm: 1_400_000_000  wait_time={governor.get_wait_time(1_400_000_000)}')
+    logging.info(f'wm: 1_500_000_000  wait_time={governor.get_wait_time(1_500_000_000)}')
+    logging.info(f'wm: 1_600_000_000  wait_time={governor.get_wait_time(1_600_000_000)}')
 
     governor.close()
