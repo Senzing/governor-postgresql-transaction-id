@@ -381,7 +381,7 @@ class Governor:
 
                     current_log_time = time.time()
                     # only log a message when the log interval has passed
-                    if ((current_log_time - self.last_log_time) > self.log_interval_in_seconds):
+                    if (current_log_time - self.last_log_time) > self.log_interval_in_seconds:
                         logging.info("senzing-{0}0004I Governor is checking PostgreSQL Transaction IDs. Host: {1}; Database: {2}; Current XID: {3} ({4}); High watermark XID: {5}".format(
                             SENZING_PRODUCT_ID, database_host, database_name, watermark, oid_name, self.high_watermark))
                         self.last_log_time = current_log_time
