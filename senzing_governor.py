@@ -42,7 +42,7 @@ import psycopg2
 __all__ = []
 __version__ = "1.0.6"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2022-05-19'
+__updated__ = '2022-10-18'
 
 # See https://github.com/Senzing/knowledge-base/blob/main/lists/senzing-product-ids.md
 SENZING_PRODUCT_ID = "5017"
@@ -223,17 +223,17 @@ class Governor:
     # -------------------------------------------------------------------------
 
     def __init__(
-        self,
-        database_urls=None,
-        high_watermark=1_500_000_000,
-        hint="",
-        interval=100_000,
-        list_separator=',',
-        low_watermark=1_200_000_000,
-        log_interval_in_seconds=600,
-        check_time_interval_in_seconds=5,
-        *args,
-        **kwargs
+            self,
+            database_urls=None,
+            high_watermark=1_500_000_000,
+            hint="",
+            interval=100_000,
+            list_separator=',',
+            low_watermark=1_200_000_000,
+            log_interval_in_seconds=600,
+            check_time_interval_in_seconds=5,
+            *args,
+            **kwargs
     ):
 
         logging.info("senzing-{0}0001I Using governor-postgresql-transaction-id Governor. Version: {1} Updated: {2}".format(
@@ -389,7 +389,7 @@ class Governor:
                     # When we get above the low water mark, use our wait time
                     # function to start to slow down.
 
-                    if watermark > self.low_watermark: # This all needs to be done based on the worst XID if all DBs
+                    if watermark > self.low_watermark:  # This all needs to be done based on the worst XID if all DBs
                         wait_time = self.get_wait_time(watermark)
                         current_log_time = time.time()
                         # log a message when the wait_time changes OR if the log interval has passed
