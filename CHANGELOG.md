@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed in 1.0.7
 
-- Unquoted database URL strings
+- Unquote database URL strings
 
 ## [1.0.6] - 2022-05-19
 
