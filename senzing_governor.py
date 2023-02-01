@@ -41,7 +41,7 @@ import psycopg2
 # Metadata
 
 __all__ = []
-__version__ = "1.0.6"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.7"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
 __updated__ = '2023-02-01'
 
