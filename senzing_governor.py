@@ -41,9 +41,9 @@ import psycopg2
 # Metadata
 
 __all__ = []
-__version__ = "1.0.7"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.8"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2023-02-01'
+__updated__ = '2023-02-02'
 
 # See https://github.com/Senzing/knowledge-base/blob/main/lists/senzing-product-ids.md
 SENZING_PRODUCT_ID = "5017"
@@ -132,6 +132,11 @@ class Governor:
             'port': self.translate(translation_map, parsed.port),
             'user': self.translate(translation_map, parsed.username),
         }
+
+        if parsed_query_string.get('schema'):
+            schema = parsed_query_string.get('schema')[0]
+            if schema:
+                result['options'] = f"-c search_path={schema}"
 
         # Return result.
 
