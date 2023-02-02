@@ -133,8 +133,8 @@ class Governor:
             'user': self.translate(translation_map, parsed.username),
         }
 
-        if parsed_query_string.get('schema'):
-            schema = parsed_query_string.get('schema')[0]
+        if parsed.get('schema'):
+            schema = parsed.get('schema')[0]
             if schema:
                 result['options'] = f"-c search_path={schema}"
 
