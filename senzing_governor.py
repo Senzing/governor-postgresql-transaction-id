@@ -24,8 +24,7 @@
 
 # Import from standard library. https://docs.python.org/3/library/
 
-from urllib.parse import parse_qs
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 import urllib.parse
 import json
 import logging
