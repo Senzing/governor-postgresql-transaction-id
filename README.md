@@ -39,14 +39,7 @@ The lowering of the watermark must be done manually by using PostgreSQL
     1. [Download](#download)
     1. [Environment variables for CLI](#environment-variables-for-cli)
     1. [Run command](#run-command)
-1. [Develop](#develop)
-    1. [Prerequisites for development](#prerequisites-for-development)
-    1. [Clone repository](#clone-repository)
-1. [Examples](#examples)
-    1. [Examples of CLI](#examples-of-cli)
-1. [Advanced](#advanced)
-    1. [Configuration](#configuration)
-1. [Errors](#errors)
+1. [Configuration](#configuration)
 1. [References](#references)
 
 ## Preamble
@@ -136,7 +129,7 @@ These are "one-time tasks" which may already have been completed.
         ```
 
 1. :thinking: **Alternative:** The entire git repository can be downloaded by following instructions at
-   [Clone repository](#clone-repository)
+   [Clone repository](docs/development.md#clone-repository)
 
 ### Environment variables for CLI
 
@@ -180,53 +173,9 @@ These are "one-time tasks" which may already have been completed.
    ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester.py
    ```
 
-1. For more examples of use, see [Examples of CLI](#examples-of-cli).
+1. For more examples of use, see [Examples of CLI](docs/examples.md#examples-of-cli).
 
-## Develop
-
-The following instructions are used when modifying and building the Docker image.
-
-### Prerequisites for development
-
-:thinking: The following tasks need to be complete before proceeding.
-These are "one-time tasks" which may already have been completed.
-
-1. The following software programs need to be installed:
-    1. [git](https://github.com/Senzing/knowledge-base/blob/main/WHATIS/git.md)
-
-### Clone repository
-
-For more information on environment variables,
-see [Environment Variables](https://github.com/Senzing/knowledge-base/blob/main/lists/environment-variables.md).
-
-1. Set these environment variable values:
-
-    ```console
-    export GIT_ACCOUNT=senzing
-    export GIT_REPOSITORY=governor-postgresql-transaction-id
-    export GIT_ACCOUNT_DIR=~/${GIT_ACCOUNT}.git
-    export GIT_REPOSITORY_DIR="${GIT_ACCOUNT_DIR}/${GIT_REPOSITORY}"
-    ```
-
-1. Using the environment variables values just set, follow steps in [clone-repository](https://github.com/Senzing/knowledge-base/blob/main/HOWTO/clone-repository.md) to install the Git repository.
-
-## Examples
-
-### Examples of CLI
-
-The following examples require initialization described in
-[Test using Command Line Interface](#test-using-command-line-interface).
-
-1. Run the command that uses Python Context Manager approach.
-   Example:
-
-   ```console
-   ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester_context_manager.py
-   ```
-
-## Advanced
-
-### Configuration
+## Configuration
 
 Configuration values specified by environment variable or command line parameter.
 
@@ -238,8 +187,8 @@ Configuration values specified by environment variable or command line parameter
 - **[SENZING_GOVERNOR_PROJECT_DIR](https://github.com/Senzing/knowledge-base/blob/main/lists/environment-variables.md#senzing_governor_project_dir)**
 - **[SENZING_GOVERNOR_WAIT](https://github.com/Senzing/knowledge-base/blob/main/lists/environment-variables.md#senzing_governor_wait)**
 
-## Errors
-
-1. See [docs/errors.md](docs/errors.md).
-
 ## References
+
+- [Development](docs/development.md)
+- [Errors](docs/errors.md)
+- [Examples](docs/examples.md)
