@@ -392,13 +392,22 @@ class Governor:
                             SENZING_PRODUCT_ID, database_host, database_name, watermark, oid_name, self.high_watermark))
                         self.last_log_time = current_log_time
 
-                    # When we get above the low water mark, use our wait time
-                    # function to start to slow down.
+                    # When we get above the low water mark, use our wait time function to start to slow down.
 
                     if watermark > self.low_watermark:  # This all needs to be done based on the worst XID if all DBs
                         wait_time = self.get_wait_time(watermark)
+
+                        # Short-circuit if the the system is in trouble.
+
+                        if wait_time < 0:
+                            return -1.0
+
+                        # Calculate largest wait time.
+
                         current_log_time = time.time()
-                        # log a message when the wait_time changes OR if the log interval has passed
+
+                        # Log a message when the wait_time changes OR if the log interval has passed
+
                         if (wait_time > self.old_wait_time) or ((current_log_time - self.last_log_time) > self.log_interval_in_seconds):
                             logging.info("senzing-{0}0005I Governor suggests waiting {1} seconds for {2} database age(XID) to go from current value of {3} ({4}) to low watermark of {5}.".format(
                                 SENZING_PRODUCT_ID, wait_time, database_name, watermark, oid_name, self.low_watermark))
