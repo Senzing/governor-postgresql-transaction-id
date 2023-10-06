@@ -41,9 +41,9 @@ import psycopg2
 # Metadata
 
 __all__ = []
-__version__ = "1.0.9"  # See https://www.python.org/dev/peps/pep-0396/
+__version__ = "1.0.10"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2020-08-26'
-__updated__ = '2023-02-09'
+__updated__ = '2023-10-05'
 
 # See https://github.com/Senzing/knowledge-base/blob/main/lists/senzing-product-ids.md
 SENZING_PRODUCT_ID = "5017"
@@ -370,9 +370,10 @@ class Governor:
 
             if (self.counter % self.interval == 0) or (time.time() > self.next_check_time):
 
-                # Reset timer.
+                # Reset timer and calculated wait time.
 
                 self.next_check_time = time.time() + self.check_time_interval_in_seconds
+                self.old_wait_time = 0.0
 
                 # Go through each database connection to determine if watermark is above high_watermark.
 
@@ -391,21 +392,27 @@ class Governor:
                             SENZING_PRODUCT_ID, database_host, database_name, watermark, oid_name, self.high_watermark))
                         self.last_log_time = current_log_time
 
-                    # When we get above the low water mark, use our wait time
-                    # function to start to slow down.
+                    # When we get above the low water mark, use our wait time function to start to slow down.
 
                     if watermark > self.low_watermark:  # This all needs to be done based on the worst XID if all DBs
                         wait_time = self.get_wait_time(watermark)
+
+                        # Short-circuit if the the system is in trouble.
+
+                        if wait_time < 0:
+                            return -1.0
+
+                        # Calculate largest wait time.
+
                         current_log_time = time.time()
-                        # log a message when the wait_time changes OR if the log interval has passed
-                        if (wait_time != self.old_wait_time) or ((current_log_time - self.last_log_time) > self.log_interval_in_seconds):
-                            logging.info("senzing-{0}0005I Governor waiting {1} seconds for {2} database age(XID) to go from current value of {3} ({4}) to low watermark of {5}.".format(
+
+                        # Log a message when the wait_time changes OR if the log interval has passed
+
+                        if (wait_time > self.old_wait_time) or ((current_log_time - self.last_log_time) > self.log_interval_in_seconds):
+                            logging.info("senzing-{0}0005I Governor suggests waiting {1} seconds for {2} database age(XID) to go from current value of {3} ({4}) to low watermark of {5}.".format(
                                 SENZING_PRODUCT_ID, wait_time, database_name, watermark, oid_name, self.low_watermark))
-                            self.old_wait_time = wait_time
+                            self.old_wait_time = max(self.old_wait_time, wait_time)
                             self.last_log_time = current_log_time
-                    elif self.old_wait_time != 0.0:
-                        logging.info("senzing-{0}0006I Governor delay ended. Returning to no wait.".format(SENZING_PRODUCT_ID))
-                        self.old_wait_time = 0.0
         return self.old_wait_time
 
     def close(self, *args, **kwargs):
