@@ -5,8 +5,9 @@ from senzing_governor import Governor
 
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
-__date__ = '2022-01-05'
-__updated__ = '2022-01-05'
+__date__ = "2022-01-05"
+__updated__ = "2022-01-05"
+
 
 class TestGetWaitTime(unittest.TestCase):
 
@@ -74,5 +75,5 @@ class TestGetWaitTime(unittest.TestCase):
         governor.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
