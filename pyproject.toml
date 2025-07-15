@@ -26,6 +26,7 @@ src_paths = ["examples", "src", "tests"]
 disable_error_code = [
     "assignment",
     "has-type",
+    "import-untyped",
     "no-untyped-call",
     "no-untyped-def",
     "union-attr",
