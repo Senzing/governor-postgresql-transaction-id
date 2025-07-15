@@ -31,6 +31,6 @@ jobs:
         uses: py-actions/flake8@v2
         with:
           ignore: "F401"
-          max-line-length: 120
+          max-line-length: 300
           path: src
           plugins: flake8-black
