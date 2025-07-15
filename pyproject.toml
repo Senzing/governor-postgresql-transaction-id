@@ -31,19 +31,25 @@ warn_unused_ignores = "false"
 module = "pytest_schema.*"
 ignore_missing_imports = "true"
 
+[[tool.mypy]]
+disable_error_code = [
+    "assignment",
+    "has-type",
+    "no-untyped-call",
+    "no-untyped-def",
+    "union-attr",
+    "var-annotated"
+]
+
+
 [tool.pylint]
 ignored-argument-names = "args|kwargs"
 disable = [
     "broad-except",
     "consider-using-f-string",
-    "import-untyped",
     "line-too-long",
-    "no-untyped-call",
-    "no-untyped-def",
     "too-many-branches",
-    "too-many-locals",
-    "union-attr",
-    "var-annotated"
+    "too-many-locals"
 ]
 good-names = [
     "template-python"
