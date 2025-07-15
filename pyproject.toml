@@ -15,7 +15,7 @@ skips = ["B101"]
 line-length = 120
 
 [tool.flake8]
-extend-ignore = ["E203", "E501", "E704", "W503"]
+extend-ignore = ["E203", "E501", "E704", "F401", "W503"]
 max-line-length = 120
 
 [tool.isort]
