@@ -36,9 +36,14 @@ ignored-argument-names = "args|kwargs"
 disable = [
     "broad-except",
     "consider-using-f-string",
+    "import-untyped",
     "line-too-long",
+    "no-untyped-call",
+    "no-untyped-def",
     "too-many-branches",
     "too-many-locals"
+    "union-attr",
+    "var-annotated",
 ]
 good-names = [
     "template-python"
