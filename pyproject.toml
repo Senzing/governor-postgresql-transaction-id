@@ -22,6 +22,16 @@ max-line-length = 120
 profile = "black"
 src_paths = ["examples", "src", "tests"]
 
+[tool.mypy]
+disable_error_code = [
+    "assignment",
+    "has-type",
+    "no-untyped-call",
+    "no-untyped-def",
+    "union-attr",
+    "var-annotated"
+]
+
 [[tool.mypy.overrides]]
 module = "senzing_abstract.szengineflags.*"
 ignore_missing_imports = "true"
@@ -31,15 +41,6 @@ warn_unused_ignores = "false"
 module = "pytest_schema.*"
 ignore_missing_imports = "true"
 
-[[tool.mypy]]
-disable_error_code = [
-    "assignment",
-    "has-type",
-    "no-untyped-call",
-    "no-untyped-def",
-    "union-attr",
-    "var-annotated"
-]
 
 
 [tool.pylint]
