@@ -105,17 +105,17 @@ These are "one-time tasks" which may already have been completed.
       ```console
       curl -X GET \
         --output ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor.py \
-        https://raw.githubusercontent.com/Senzing/governor-postgresql-transaction-id/main/senzing_governor.py
+        https://raw.githubusercontent.com/Senzing/governor-postgresql-transaction-id/main/src/senzing_governor.py
 
       curl -X GET \
         --output ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester.py \
-        https://raw.githubusercontent.com/Senzing/governor-postgresql-transaction-id/main/senzing_governor_tester.py
+        https://raw.githubusercontent.com/Senzing/governor-postgresql-transaction-id/main/src/senzing_governor_tester.py
 
       chmod +x ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester.py
 
       curl -X GET \
         --output ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester_context_manager.py \
-        https://raw.githubusercontent.com/Senzing/governor-postgresql-transaction-id/main/senzing_governor_tester_context_manager.py
+        https://raw.githubusercontent.com/Senzing/governor-postgresql-transaction-id/main/src/senzing_governor_tester_context_manager.py
 
       chmod +x ${SENZING_GOVERNOR_PROJECT_DIR}/senzing_governor_tester_context_manager.py
       ```
@@ -184,7 +184,7 @@ Configuration values specified by environment variable or command line parameter
 - [Errors]
 - [Examples]
 
-[apt-packages.txt]: src/apt-packages.txt
+[apt-packages.txt]: packages/apt-packages.txt
 [Clone repository]: docs/development.md#clone-repository
 [Configuration]: #configuration
 [Debian, Ubuntu and others]: https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based
@@ -217,8 +217,8 @@ Configuration values specified by environment variable or command line parameter
 [SENZING_GOVERNOR_POSTGRESQL_LOW_WATERMARK]: https://github.com/Senzing/knowledge-base/blob/main/lists/environment-variables.md#senzing_governor_postgresql_low_watermark
 [SENZING_GOVERNOR_PROJECT_DIR]: https://github.com/Senzing/knowledge-base/blob/main/lists/environment-variables.md#senzing_governor_project_dir
 [SENZING_GOVERNOR_WAIT]: https://github.com/Senzing/knowledge-base/blob/main/lists/environment-variables.md#senzing_governor_wait
-[senzing_governor.py]: senzing_governor.py
+[senzing_governor.py]: src/senzing_governor.py
 [Senzing]: https://senzing.com
 [stream-loader.py]: https://github.com/Senzing/stream-loader/blob/main/stream-loader.py
 [Test using Command Line Interface]: #test-using-command-line-interface
-[yum-packages.txt]: src/yum-packages.txt
+[yum-packages.txt]: packages/yum-packages.txt

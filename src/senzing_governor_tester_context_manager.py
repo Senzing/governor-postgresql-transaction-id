@@ -7,19 +7,20 @@ import os
 import threading
 import time
 
-# Import from local file system.
-
 import senzing_governor
 from senzing_governor import Governor
+
+# Import from local file system.
+
 
 # Metadata
 
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
-__date__ = '2020-08-26'
-__updated__ = '2022-03-22'
+__date__ = "2020-08-26"
+__updated__ = "2022-03-22"
 
-log_format = '%(asctime)s %(message)s'
+log_format = "%(asctime)s %(message)s"
 
 # -----------------------------------------------------------------------------
 # Class: ExampleThread
@@ -40,12 +41,13 @@ class ExampleThread(threading.Thread):
             self.governor.govern()
             logging.info("{0}".format(threading.current_thread().name))
 
+
 # -----------------------------------------------------------------------------
 # main
 # -----------------------------------------------------------------------------
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Configure logging.
 
