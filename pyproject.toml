@@ -18,9 +18,9 @@ license-files = [
 ]
 
 [project.urls]
-bugtracker = "https://github.com/senzing-garage/sz-sdk-python-grpc/issues"
-changelog = "https://github.com/senzing-garage/sz-sdk-python-grpc/blob/main/CHANGELOG.md"
-source = "https://github.com/senzing-garage/sz-sdk-python-grpc"
+bugtracker = "https://github.com/senzing-garage/governor-postgresql-transaction-id/issues"
+changelog = "https://github.com/senzing-garage/governor-postgresql-transaction-id/blob/main/CHANGELOG.md"
+source = "https://github.com/senzing-garage/governor-postgresql-transaction-id"
 
 [build-system]
 requires = ["setuptools>=42", "wheel"]
