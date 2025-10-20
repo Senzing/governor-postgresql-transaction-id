@@ -41,7 +41,7 @@ development = [
   "coverage==7.10.7",
   "cryptography==46.0.3",
   "orjson==3.11.3",
-  "psutil==7.1.0",
+  "psutil==7.1.1",
   "pytest-cov==7.0.0",
   "pytest-schema==0.1.2",
   "pytest==8.4.2",
