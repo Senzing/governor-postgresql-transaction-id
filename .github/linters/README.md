@@ -12,7 +12,6 @@
 - [.jscpd.json]
 - Used by [lint-workflows.yaml]
 - [jscpd]
-
   - [jscpd configuration]
   - Example:
 
