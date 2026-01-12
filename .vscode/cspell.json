@@ -8,6 +8,7 @@
     "autodoc",
     "autodocsumm",
     "bugtracker",
+    "buildx",
     "CCLA",
     "CODEOWNER",
     "cooldown",
@@ -15,6 +16,7 @@
     "datname",
     "devhelp",
     "Dockerfiles",
+    "dockerhub",
     "esbenp",
     "fpvs",
     "highwater",
@@ -53,7 +55,8 @@
     "typehints",
     "vararg",
     "venv",
-    "virtualenv"
+    "virtualenv",
+    "zizmor"
   ],
   "ignorePaths": [
     ".git/**",

@@ -38,7 +38,6 @@ python -m build
 The entire implementation is in `src/senzing_governor.py`:
 
 - **`Governor` class**: The main class implementing the governor pattern
-
   - `__init__()`: Configures watermarks, intervals, and database connections from environment variables or parameters
   - `govern()`: Called by worker threads; checks XID age periodically and returns wait time (uses thread locking)
   - `close()`: Closes database connections

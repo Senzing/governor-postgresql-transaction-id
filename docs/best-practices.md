@@ -1,4 +1,4 @@
-# governor-postres-transaction-id best practices
+# governor-postgresql-transaction-id best practices
 
 ## README.md
 
@@ -9,6 +9,7 @@
 1. Use best practices:
    1. Docker's [Best practices for writing Dockerfiles].
 1. Use "lint" when applicable.
+
    1. Online linter: [FROM: latest]
    1. GitHub [projectatomic/dockerfile_lint] using Docker
 
@@ -27,10 +28,11 @@
 ## CONTRIBUTING.md
 
 1. Modifications:
+
    1. Change following value to appropriate Git repository name.
 
       ```markdown
-      export GIT_REPOSITORY=governor-postres-transaction-id
+      export GIT_REPOSITORY=governor-postgresql-transaction-id
       ```
 
 [Best practices for writing Dockerfiles]: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
