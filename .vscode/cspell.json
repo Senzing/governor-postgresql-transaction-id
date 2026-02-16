@@ -25,6 +25,7 @@
     "isort",
     "jquery",
     "jsmath",
+    "kernelsam",
     "kwargs",
     "lukehinds",
     "mypy",
