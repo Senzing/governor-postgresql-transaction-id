@@ -39,7 +39,7 @@ development = [
   "coverage==7.13.2; python_version > '3.11'",
   "cryptography==46.0.4",
   "orjson==3.11.5",
-  "psutil==7.2.1",
+  "psutil==7.2.2",
   "pytest-cov==7.0.0",
   "pytest-schema==0.1.2",
   "pytest==8.4.2; python_version <= '3.11'",
