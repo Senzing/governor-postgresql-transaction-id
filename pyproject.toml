@@ -23,7 +23,7 @@ changelog = "https://github.com/senzing-garage/governor-postgresql-transaction-i
 source = "https://github.com/senzing-garage/governor-postgresql-transaction-id"
 
 [build-system]
-requires = ["setuptools>=80", "wheel"]
+requires = ["setuptools>=82.0.1", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [dependency-groups]
